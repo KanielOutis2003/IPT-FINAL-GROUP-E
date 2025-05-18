@@ -25,6 +25,9 @@ router.post('/', authorize(Role.Admin), createSchema, create);
 router.put('/:id', authorize(), updateSchema, update);
 router.delete('/:id', authorize(), _delete);
 
+// Add a simple test endpoint for authentication debugging
+router.get('/test-auth', testAuth);
+
 module.exports = router;
 
 // Validates login credentials format
@@ -267,9 +270,50 @@ function _delete(req, res, next) {
 
 // Sets HTTP-only cookie with refresh token
 function setTokenCookie(res, token) {
+    // Log detailed information about the cookie being set
+    console.log(`Setting refresh token cookie: ${token.substring(0, 10)}...`);
+    
     const cookieOptions = {
-      httpOnly: true,
-      expires: new Date(Date.now() + 7*24*60*60*1000)
+        httpOnly: true,
+        sameSite: 'none',  // Required for cross-domain cookies
+        secure: true,      // Required when sameSite is 'none'
+        expires: new Date(Date.now() + 7*24*60*60*1000),
+        path: '/'
     };
+    
+    // Log the cookie options
+    console.log('Cookie options:', JSON.stringify(cookieOptions));
+    
     res.cookie('refreshToken', token, cookieOptions);
+}
+
+// Simple authentication test endpoint
+function testAuth(req, res) {
+    // Return headers, cookies and authentication status for debugging
+    const authHeader = req.headers.authorization;
+    const cookies = req.cookies;
+    
+    console.log('Test Auth Request:');
+    console.log('Headers:', JSON.stringify(req.headers));
+    console.log('Cookies:', JSON.stringify(cookies));
+    
+    const hasAuth = !!authHeader;
+    const hasRefreshToken = !!cookies.refreshToken;
+    
+    res.json({
+        message: 'Authentication test endpoint',
+        timestamp: new Date().toISOString(),
+        authentication: {
+            hasAuthHeader: hasAuth,
+            hasRefreshToken: hasRefreshToken,
+            authHeaderPrefix: hasAuth ? authHeader.substring(0, 15) + '...' : null
+        },
+        // Safe to return limited headers for debugging
+        headers: {
+            origin: req.headers.origin,
+            host: req.headers.host,
+            referer: req.headers.referer,
+            'user-agent': req.headers['user-agent']
+        }
+    });
 }

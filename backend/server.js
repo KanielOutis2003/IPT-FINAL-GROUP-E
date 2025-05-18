@@ -31,13 +31,46 @@ console.log('Database connection details:', databaseConfig);
 console.log('Attempting to connect to MySQL server...');
 console.log(`Connecting to: ${databaseConfig.host}:${databaseConfig.port} with user ${databaseConfig.user}`);
 
+// Expanded CORS configuration to allow all Firebase domains and subdomains
+const allowedOrigins = [
+    'http://localhost:4200',
+    'https://r-ito-f1e03.web.app',
+    'https://r-ito-f1e03.firebaseapp.com',
+    'https://ipt-final-group-e-zht3.onrender.com',
+    'https://r-ito-f1e03--staging.web.app',  // Staging URLs
+    'https://r-ito-f1e03--staging.firebaseapp.com'
+];
+
 // CORS configuration with proper origins
 app.use(cors({
-    origin: ['http://localhost:4200', 'https://r-ito-f1e03.web.app', 'https://r-ito-f1e03.firebaseapp.com'],
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps, curl, etc.)
+        if(!origin) return callback(null, true);
+        
+        // Log the origin for debugging
+        console.log('Incoming request from origin:', origin);
+        
+        if(allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            console.warn(`Origin ${origin} not allowed by CORS`);
+            // Still allow it for now, but warn in logs
+            callback(null, true);
+        }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    exposedHeaders: ['Authorization'],
+    credentials: true,
+    maxAge: 86400 // 24 hours
 }));
+
+// Add a middleware to log all incoming requests
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    console.log('Headers:', JSON.stringify(req.headers));
+    next();
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
