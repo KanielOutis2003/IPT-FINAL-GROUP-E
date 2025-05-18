@@ -1,0 +1,35 @@
+services:
+  # Backend API Service
+  - type: web
+    name: ipt-final-api
+    env: node
+    # Use the root package.json scripts which will handle backend installation properly
+    buildCommand: npm run render:build
+    startCommand: npm run render:start
+    healthCheckPath: /api-docs
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: PORT
+        value: 10000
+      - key: DB_HOST
+        value: 153.92.15.31
+      - key: DB_PORT
+        value: 3306
+      - key: DB_USER
+        value: u875409848_jumaoas
+      - key: DB_PASSWORD
+        value: 9T2Z5$3UKkgSYzE
+      - key: DB_NAME
+        value: u875409848_jumaoas
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: "24h"
+      - key: FRONTEND_URL
+        value: https://ipt-final-224d3.web.app
+      - key: BACKEND_URL
+        value: https://ipt-final-api.onrender.com 

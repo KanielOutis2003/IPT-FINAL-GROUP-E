@@ -1,0 +1,23 @@
+{
+    "database": {
+      "host": "localhost",
+      "port": 3306,
+      "user": "root",
+      "password": "",
+      "database": "request_management_system"
+    },
+    "secret": "AXAXAXAXAXAXAXDXDXDXD",
+    "emailFrom": "info@node-mysql-signup-verification-api.com",
+    "smtpOptions": {
+      "host": "smtp.ethereal.email",
+      "port": 587,
+      "auth": {
+        "user": "kendra.towne@ethereal.email",
+        "pass": "2WCUUXuyhM9f4tybhd"
+      }
+    },
+    "frontendUrls": {
+      "development": "http://localhost:4200",
+      "production": ""
+    }
+}

@@ -1,0 +1,39 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card">
+        <div class="card-header text-center">
+          <h4 class="mb-0">Verify Email</h4>
+          <p class="text-white-50 mb-0">Confirming your email address</p>
+        </div>
+        <div class="card-body p-4">
+          <div *ngIf="emailStatus == EmailStatus.Verifying" class="text-center">
+            <p>Verifying your email address...</p>
+            <div class="spinner-border text-primary mx-auto my-3" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+          <div *ngIf="emailStatus == EmailStatus.Failed">
+            <div class="alert alert-danger">
+              <p>Verification failed. This could be because:</p>
+              <ul>
+                <li>The verification link has expired</li>
+                <li>The verification link has already been used</li>
+                <li>The verification token is invalid</li>
+              </ul>
+              <p>You can try to:</p>
+              <ul>
+                <li>Register again with the same email</li>
+                <li>Use the <a routerLink="/account/forgot-password">forgot password</a> feature</li>
+                <li>Contact support for assistance</li>
+              </ul>
+            </div>
+            <div class="text-center mt-4">
+              <a routerLink="/account/login" class="btn-link">Back to Login</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,40 @@
+{
+  "name": "user-management-system",
+  "version": "1.0.0",
+  "description": "User Management System API",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "render:build": "cd ../frontend && npm install --legacy-peer-deps && npm install bootstrap@5.3.2 @fortawesome/fontawesome-free@6.5.1 --legacy-peer-deps && npm run build && cd ../backend && npm install --legacy-peer-deps",
+    "render:start": "npm start",
+    "debug:build": "echo 'Starting build...' && cd ../frontend && echo 'In frontend directory' && npm install --legacy-peer-deps && npm install bootstrap@5.3.2 @fortawesome/fontawesome-free@6.5.1 --legacy-peer-deps && echo 'Frontend dependencies installed' && npm run build && echo 'Frontend build complete' && cd ../backend && echo 'In backend directory' && npm install --legacy-peer-deps && echo 'Backend dependencies installed'"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "debug": "^4.3.4",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "express-jwt": "^6.1.1",
+    "express-validator": "^7.0.1",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.6.5",
+    "nodemailer": "^6.10.0",
+    "rootpath": "^0.1.2",
+    "sequelize": "^6.33.0",
+    "swagger-jsdoc": "^6.0.0",
+    "swagger-ui-express": "^4.6.0",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
