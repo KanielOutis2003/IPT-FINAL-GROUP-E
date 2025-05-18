@@ -16,6 +16,10 @@
         "pass": "2WCUUXuyhM9f4tybhd"
       }
     },
+    "frontendUrls": {
+      "development": "http://localhost:4200",
+      "production": "https://r-ito-f1e03.web.app"
+    },
     "backendUrls": {
       "development": "http://localhost:4200",
       "production": "https://r-ito-f1e03.web.app"
