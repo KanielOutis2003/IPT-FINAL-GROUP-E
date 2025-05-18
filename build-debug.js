@@ -43,54 +43,112 @@ try {
   console.log('Error listing directory:', error);
 }
 
+// Check angular.json file
+console.log('Checking Angular configuration...');
+try {
+  if (fs.existsSync('./angular.json')) {
+    const angularConfig = require('./angular.json');
+    console.log('Angular project type:', angularConfig.projects?.frontend?.projectType);
+    console.log('Angular builder:', angularConfig.projects?.frontend?.architect?.build?.builder);
+  } else {
+    console.log('WARNING: angular.json file not found!');
+  }
+} catch (error) {
+  console.log('Error reading angular.json:', error);
+}
+
+// Remove node_modules to start fresh
+console.log('Removing node_modules directory...');
+try {
+  if (process.platform === 'win32') {
+    if (fs.existsSync('./node_modules')) {
+      execSync('rmdir /s /q node_modules', { stdio: 'inherit' });
+    }
+  } else {
+    execSync('rm -rf node_modules', { stdio: 'inherit' });
+  }
+  console.log('Removed node_modules directory.');
+} catch (error) {
+  console.log('Error removing node_modules directory:', error);
+}
+
 // Install frontend dependencies
 console.log('Installing frontend dependencies...');
 try {
-  execSync('npm install --legacy-peer-deps', { stdio: 'inherit' });
+  execSync('npm install --legacy-peer-deps --verbose', { stdio: 'inherit' });
   console.log('Frontend dependencies installed successfully.');
 } catch (error) {
   console.log('ERROR installing frontend dependencies:', error);
   process.exit(1);
 }
 
-// Explicitly install Angular CLI and build package in frontend directory
-console.log('Installing Angular CLI and build packages...');
-try {
-  execSync('npm install @angular/cli@16.2.12 @angular-devkit/build-angular@16.2.12 --legacy-peer-deps', { stdio: 'inherit' });
-  console.log('Angular CLI and build packages installed successfully.');
-} catch (error) {
-  console.log('ERROR installing Angular CLI and build packages:', error);
-  // Continue anyway, it might already be installed
+// Check if core packages are installed
+console.log('Checking for key Angular packages:');
+const requiredPackages = [
+  '@angular/cli',
+  '@angular-devkit/build-angular'
+];
+
+for (const pkg of requiredPackages) {
+  if (fs.existsSync(`./node_modules/${pkg}`)) {
+    console.log(`✓ ${pkg} is installed.`);
+  } else {
+    console.log(`✗ ${pkg} is NOT installed. Installing it now...`);
+    try {
+      execSync(`npm install ${pkg}@16.2.12 --legacy-peer-deps --verbose`, { stdio: 'inherit' });
+    } catch (err) {
+      console.log(`ERROR installing ${pkg}:`, err);
+    }
+  }
 }
 
-// Find the correct path to Angular CLI
-let ngPath;
-if (fs.existsSync('./node_modules/.bin/ng')) {
-  ngPath = './node_modules/.bin/ng';
-} else if (fs.existsSync('./node_modules/@angular/cli/bin/ng')) {
-  ngPath = 'node ./node_modules/@angular/cli/bin/ng';
-} else {
-  console.log('WARNING: Could not find Angular CLI binary, will try with npx');
-  ngPath = 'npx ng';
-}
-
-// Build the Angular app using the local node_modules binaries
-console.log(`Building Angular app using: ${ngPath}`);
+// Try a direct build approach using the locally installed packages
+console.log('Attempting direct Angular build...');
 try {
-  execSync(`${ngPath} build --configuration production`, { stdio: 'inherit' });
-  console.log('Angular app built successfully.');
-} catch (error) {
-  console.log('ERROR building Angular app:', error);
-  console.log(error.message);
+  // Create a direct build script
+  const buildScript = `
+    const { execSync } = require('child_process');
+    const angularCliPath = require.resolve('@angular/cli/lib/init.js');
+    const buildAngularPath = require.resolve('@angular-devkit/build-angular');
+    
+    console.log('Angular CLI path:', angularCliPath);
+    console.log('Build Angular path:', buildAngularPath);
+    
+    // Run the Angular CLI programmatically
+    process.argv[2] = 'build';
+    process.argv[3] = '--configuration=production';
+    
+    require('@angular/cli/lib/init');
+  `;
   
-  // Try an alternative approach with npx if the first one failed
+  fs.writeFileSync('direct-build.js', buildScript);
+  console.log('Created direct-build.js script.');
+  
+  // Run the direct build script
+  execSync('node direct-build.js', { stdio: 'inherit' });
+  console.log('Angular app built successfully with direct approach.');
+} catch (error) {
+  console.log('ERROR with direct build approach:', error);
+  
+  // Try alternative approach with global installation
   try {
-    console.log('Trying alternative build approach with npx...');
-    execSync('npx @angular/cli@16.2.12 build --configuration production', { stdio: 'inherit' });
-    console.log('Angular app built successfully with alternative approach.');
-  } catch (altError) {
-    console.log('ERROR building Angular app with alternative approach:', altError);
-    process.exit(1);
+    console.log('Trying alternative build with global installation...');
+    execSync('npm install -g @angular/cli@16.2.12 @angular-devkit/build-angular@16.2.12', { stdio: 'inherit' });
+    execSync('ng build --configuration production', { stdio: 'inherit' });
+    console.log('Angular app built successfully with global installation.');
+  } catch (globalError) {
+    console.log('ERROR with global installation approach:', globalError);
+    
+    // One last attempt with Angular CLI version 15
+    try {
+      console.log('Trying with Angular CLI version 15...');
+      execSync('npm install -g @angular/cli@15 @angular-devkit/build-angular@15', { stdio: 'inherit' });
+      execSync('ng build --configuration production', { stdio: 'inherit' });
+      console.log('Angular app built successfully with Angular 15.');
+    } catch (finalError) {
+      console.log('ERROR with Angular 15 approach:', finalError);
+      process.exit(1);
+    }
   }
 }
 
