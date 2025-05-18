@@ -1,0 +1,67 @@
+<div class="users-container">
+    <h1>Users</h1>
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngIf="loading">
+                    <td colspan="7" class="text-center">
+                        <span class="spinner-border spinner-border-lg"></span>
+                    </td>
+                </tr>
+                <tr *ngFor="let user of users">
+                    <td>
+                        <span *ngIf="!user.isEditing">{{user.title}}</span>
+                        <select *ngIf="user.isEditing" [(ngModel)]="user.title" class="form-control form-control-sm">
+                            <option value="Mr">Mr</option>
+                            <option value="Mrs">Mrs</option>
+                            <option value="Ms">Ms</option>
+                            <option value="Dr">Dr</option>
+                        </select>
+                    </td>
+                    <td>
+                        <span *ngIf="!user.isEditing">{{user.firstName}}</span>
+                        <input *ngIf="user.isEditing" type="text" [(ngModel)]="user.firstName" class="form-control form-control-sm">
+                    </td>
+                    <td>
+                        <span *ngIf="!user.isEditing">{{user.lastName}}</span>
+                        <input *ngIf="user.isEditing" type="text" [(ngModel)]="user.lastName" class="form-control form-control-sm">
+                    </td>
+                    <td>{{user.email}}</td>
+                    <td>{{user.role}}</td>
+                    <td>
+                        <span class="badge" [ngClass]="{'bg-success': user.isVerified, 'bg-warning': !user.isVerified}">
+                            {{user.isVerified ? 'Verified' : 'Pending'}}
+                        </span>
+                    </td>
+                    <td>
+                        <button *ngIf="!user.isEditing" class="btn btn-sm btn-primary" (click)="startEdit(user)">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button *ngIf="user.isEditing" class="btn btn-sm btn-success" (click)="saveEdit(user)">
+                            <i class="fas fa-save"></i> Save
+                        </button>
+                        <button *ngIf="user.isEditing" class="btn btn-sm btn-secondary" (click)="cancelEdit(user)">
+                            <i class="fas fa-times"></i> Cancel
+                        </button>
+                    </td>
+                </tr>
+                <tr *ngIf="!loading && users.length === 0">
+                    <td colspan="7" class="text-center">
+                        No users found
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div> 
