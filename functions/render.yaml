@@ -21,11 +21,11 @@ services:
       - key: DB_PORT
         value: 3306
       - key: DB_USER
-        value: u875409848_jumaoas
+        value: u875409848_rrivas  
       - key: DB_PASSWORD
         value: 9T2Z5$3UKkgSYzE
       - key: DB_NAME
-        value: u875409848_jumaoas
+        value: u875409848_rrivas  
       - key: JWT_SECRET
         sync: false
       - key: JWT_EXPIRES_IN
