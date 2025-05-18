@@ -19,9 +19,21 @@ console.log('Environment variables:', {
     hasDBPassword: !!process.env.DB_PASSWORD
 });
 
-// CORS configuration with specific allowed origin
+// Get database details for logging
+const databaseConfig = {
+    host: config.database.host,
+    port: config.database.port,
+    user: config.database.user,
+    database: config.database.database,
+    hasPassword: !!config.database.password,
+};
+console.log('Database connection details:', databaseConfig);
+console.log('Attempting to connect to MySQL server...');
+console.log(`Connecting to: ${databaseConfig.host}:${databaseConfig.port} with user ${databaseConfig.user}`);
+
+// CORS configuration with proper origins
 app.use(cors({
-    origin: ['http://localhost:4200', 'https://r-ito-f1e03.web.app/'],
+    origin: ['http://localhost:4200', 'https://r-ito-f1e03.web.app', 'https://r-ito-f1e03.firebaseapp.com'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
