@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <base href="/" />
+    <meta charset="utf-8" />
+    <title>User Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="User Management System with Email Verification and Authentication" />
+    <meta name="theme-color" content="#007bff" />
+    
+    <!-- Special script to handle account routes -->
+    <script>
+      // This script runs before Angular loads and ensures account routes work properly
+      (function() {
+        // Check current path
+        const path = window.location.pathname;
+        
+        // Define all account-related routes that should bypass authentication
+        const accountRoutes = [
+          '/account/',
+          '/register',
+          '/verify-email',
+          '/reset-password',
+          '/forgot-password'
+        ];
+        
+        // Check if current path matches any account route
+        const isAccountRoute = accountRoutes.some(route => path.includes(route));
+        
+        if (isAccountRoute) {
+          // Clear any flag that might indicate we're not on an account route
+          localStorage.removeItem('redirectToLogin');
+          
+          // Set account route flag for the AuthGuard
+          localStorage.setItem('isAccountRoute', 'true');
+          localStorage.setItem('lastAccountRoute', path);
+          console.log('Account route detected in index.html, setting flags:', path);
+          
+          // Save query parameters if present (important for reset-password token)
+          if (window.location.search) {
+            localStorage.setItem('accountRouteParams', window.location.search);
+            console.log('Saved query parameters:', window.location.search);
+          }
+          
+          // For cases where the route changes between page loads
+          if (path !== localStorage.getItem('lastAccountPath')) {
+            localStorage.setItem('lastAccountPath', path);
+          }
+        }
+      })();
+      
+      // Save the original navigation methods to intercept them
+      (function() {
+        // Intercept pushState to track account route navigation
+        const originalPushState = window.history.pushState;
+        window.history.pushState = function(state, title, url) {
+          if (url) {
+            // Define all account-related routes that should bypass authentication
+            const accountRoutes = [
+              '/account/',
+              '/register',
+              '/verify-email',
+              '/reset-password',
+              '/forgot-password'
+            ];
+            
+            // Check if the URL matches any account route
+            const isAccountRoute = accountRoutes.some(route => url.includes(route));
+            
+            if (isAccountRoute) {
+              localStorage.setItem('isAccountRoute', 'true');
+              localStorage.setItem('lastAccountRoute', url);
+              console.log('Intercepted navigation to account route:', url);
+            } else {
+              // Only remove the flag when navigating away from account routes
+              localStorage.removeItem('isAccountRoute');
+            }
+          }
+          return originalPushState.apply(this, arguments);
+        };
+        
+        // Ensure the AuthGuard doesn't run for account routes by setting a flag before page unloads
+        window.addEventListener('beforeunload', function() {
+          // When unloading on an account route, make sure the flag stays
+          const path = window.location.pathname;
+          const accountRoutes = [
+            '/account/',
+            '/register',
+            '/verify-email',
+            '/reset-password',
+            '/forgot-password'
+          ];
+          
+          const isAccountRoute = accountRoutes.some(route => path.includes(route));
+          
+          if (isAccountRoute) {
+            // Set a flag with a timestamp that will be checked on reload
+            localStorage.setItem('accountRouteReload', Date.now().toString());
+            localStorage.setItem('lastAccountPath', path);
+          }
+        });
+      })();
+    </script>
+    
+    <!-- Preload critical assets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    
+    <!-- Apple Touch Icon -->
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.webmanifest">
+  </head>
+  <body>
+    <app-root></app-root>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
