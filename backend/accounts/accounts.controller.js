@@ -28,6 +28,9 @@ router.delete('/:id', authorize(), _delete);
 // Add a simple test endpoint for authentication debugging
 router.get('/test-auth', testAuth);
 
+// Add a public test endpoint that doesn't require authentication
+router.get('/test-public', testPublic);
+
 module.exports = router;
 
 // Validates login credentials format
@@ -41,14 +44,37 @@ function authenticateSchema(req, res, next) {
 
 // Handles user authentication and returns JWT token
 function authenticate(req, res, next) {
+    console.log('Authentication attempt:', {
+        email: req.body.email,
+        ipAddress: req.ip,
+        userAgent: req.get('user-agent'),
+        origin: req.get('origin') || 'none'
+    });
+    
+    // Log full request headers for debugging
+    console.log('Authentication request headers:', JSON.stringify(req.headers));
+    
     const { email, password } = req.body;
     const ipAddress = req.ip;
+    
+    // Set CORS headers to ensure they're correctly applied
+    res.setHeader('Access-Control-Allow-Origin', req.get('origin') || '*');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
+    
     accountService.authenticate({ email, password, ipAddress })
         .then(({ refreshToken, ...account }) => {
+            console.log('Authentication successful for:', email);
             setTokenCookie(res, refreshToken);
+            
+            // Log the response for debugging
+            console.log('Sending authentication response with cookie');
             res.json(account);
         })
-        .catch(next);
+        .catch(error => {
+            console.error('Authentication failed:', error.message);
+            next(error);
+        });
 }
 
 // Validates new user registration data
@@ -314,6 +340,45 @@ function testAuth(req, res) {
             host: req.headers.host,
             referer: req.headers.referer,
             'user-agent': req.headers['user-agent']
+        }
+    });
+}
+
+// Add a public test endpoint that doesn't require authentication
+function testPublic(req, res) {
+    // Get server information
+    const serverInfo = {
+        nodeVersion: process.version,
+        platform: process.platform,
+        memoryUsage: process.memoryUsage(),
+        uptime: process.uptime()
+    };
+    
+    // Log request information
+    console.log('Public Test Request:');
+    console.log('Headers:', JSON.stringify(req.headers));
+    
+    // Respond with comprehensive debug information
+    res.json({
+        message: 'Public test endpoint (no auth required)',
+        timestamp: new Date().toISOString(),
+        serverInfo: serverInfo,
+        clientInfo: {
+            ip: req.ip,
+            method: req.method,
+            url: req.originalUrl,
+            origin: req.get('origin') || 'none'
+        },
+        // Send environment info
+        env: {
+            nodeEnv: process.env.NODE_ENV || 'development',
+            port: process.env.PORT || 'default'
+        },
+        // Include CORS test data
+        corsTest: {
+            allowedHeaders: ['Content-Type', 'Authorization'],
+            allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+            allowCredentials: true
         }
     });
 }
