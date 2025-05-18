@@ -18,6 +18,6 @@
     },
     "frontendUrls": {
       "development": "http://localhost:4200",
-      "production": "https://ipt-final.web.app"
+      "production": ""
     }
 }
