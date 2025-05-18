@@ -21,7 +21,7 @@ console.log('Environment variables:', {
 
 // CORS configuration with specific allowed origin
 app.use(cors({
-    origin: ['http://localhost:4200', 'https://ipt-final-224d3.web.app'],
+    origin: ['http://localhost:4200', 'https://r-ito-f1e03.web.app/'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
