@@ -4,6 +4,10 @@ const path = require('path');
 
 console.log('Starting debug build process...');
 
+// Check if we're on Render by checking environment variable
+const isRender = process.env.RENDER === 'true';
+console.log(`Running on Render: ${isRender ? 'Yes' : 'No'}`);
+
 // Check if frontend directory exists
 console.log('Checking if frontend directory exists...');
 if (fs.existsSync('./frontend')) {
@@ -11,26 +15,6 @@ if (fs.existsSync('./frontend')) {
 } else {
   console.log('ERROR: Frontend directory not found!');
   process.exit(1);
-}
-
-// Check if Angular CLI is installed globally
-try {
-  console.log('Checking if Angular CLI is installed...');
-  execSync('npx -v', { stdio: 'inherit' });
-  console.log('NPX available.');
-} catch (error) {
-  console.log('ERROR: NPX not available:', error);
-  process.exit(1);
-}
-
-// Show directory structure
-console.log('Showing directory structure:');
-try {
-  execSync('ls -la', { stdio: 'inherit' });
-  console.log('Showing frontend directory structure:');
-  execSync('ls -la ./frontend', { stdio: 'inherit' });
-} catch (error) {
-  console.log('Error showing directory structure:', error);
 }
 
 // Install dependencies in root
@@ -46,6 +30,18 @@ try {
 // Move to the frontend directory for all Angular operations
 console.log('Changing to frontend directory...');
 process.chdir('./frontend');
+
+// List directory contents (works on both Windows and Linux)
+console.log('Listing directory contents:');
+try {
+  if (process.platform === 'win32') {
+    execSync('dir', { stdio: 'inherit' });
+  } else {
+    execSync('ls -la', { stdio: 'inherit' });
+  }
+} catch (error) {
+  console.log('Error listing directory:', error);
+}
 
 // Install frontend dependencies
 console.log('Installing frontend dependencies...');
@@ -67,16 +63,35 @@ try {
   // Continue anyway, it might already be installed
 }
 
+// Find the correct path to Angular CLI
+let ngPath;
+if (fs.existsSync('./node_modules/.bin/ng')) {
+  ngPath = './node_modules/.bin/ng';
+} else if (fs.existsSync('./node_modules/@angular/cli/bin/ng')) {
+  ngPath = 'node ./node_modules/@angular/cli/bin/ng';
+} else {
+  console.log('WARNING: Could not find Angular CLI binary, will try with npx');
+  ngPath = 'npx ng';
+}
+
 // Build the Angular app using the local node_modules binaries
-console.log('Building Angular app...');
+console.log(`Building Angular app using: ${ngPath}`);
 try {
-  // Use the local node_modules/.bin/ng directly
-  execSync('node ./node_modules/@angular/cli/bin/ng build --configuration production', { stdio: 'inherit' });
+  execSync(`${ngPath} build --configuration production`, { stdio: 'inherit' });
   console.log('Angular app built successfully.');
 } catch (error) {
   console.log('ERROR building Angular app:', error);
   console.log(error.message);
-  process.exit(1);
+  
+  // Try an alternative approach with npx if the first one failed
+  try {
+    console.log('Trying alternative build approach with npx...');
+    execSync('npx @angular/cli@16.2.12 build --configuration production', { stdio: 'inherit' });
+    console.log('Angular app built successfully with alternative approach.');
+  } catch (altError) {
+    console.log('ERROR building Angular app with alternative approach:', altError);
+    process.exit(1);
+  }
 }
 
 // Return to the root directory
