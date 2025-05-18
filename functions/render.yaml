@@ -31,6 +31,6 @@ services:
       - key: JWT_EXPIRES_IN
         value: "24h"
       - key: FRONTEND_URL
-        value: https://ipt-final.onrender.com
+        value: https://rrrivas-fed28.web.app
       - key: BACKEND_URL
-        value: https://ipt-final-api.onrender.com 
+        value:
