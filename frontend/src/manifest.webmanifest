@@ -1,0 +1,13 @@
+{
+  "name": "User Management System",
+  "short_name": "UMS",
+  "theme_color": "#007bff",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/"
+} 
+ 
+ 
+ 
+ 
