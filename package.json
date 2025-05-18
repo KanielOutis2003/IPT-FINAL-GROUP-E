@@ -4,14 +4,14 @@
   "scripts": {
     "ng": "ng",
     "start": "cd backend && node server.js",
-    "build": "ng build --configuration production",
+    "build": "cd frontend && ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "server": "cd backend && nodemon server.js",
     "client": "cd frontend && ng serve --open",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "heroku-postbuild": "ng build --configuration production",
-    "render:build": "npm install --legacy-peer-deps && cd backend && npm install --legacy-peer-deps",
+    "heroku-postbuild": "cd frontend && ng build --configuration production",
+    "render:build": "node build-debug.js",
     "render:start": "cd backend && npm start"
   },
   "engines": {
