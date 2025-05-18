@@ -20,16 +20,16 @@ services:
       - key: DB_PORT
         value: 3306
       - key: DB_USER
-        value: u875409848_jumaoas
+        value:  u875409848_ito
       - key: DB_PASSWORD
         value: 9T2Z5$3UKkgSYzE
       - key: DB_NAME
-        value: u875409848_jumaoas
+        value:  u875409848_ito
       - key: JWT_SECRET
         sync: false
       - key: JWT_EXPIRES_IN
         value: "24h"
       - key: FRONTEND_URL
-        value: https://ipt-final-224d3.web.app
+        value: https://r-ito-f1e03.web.app
       - key: BACKEND_URL
-        value: https://ipt-final-api.onrender.com 
+        value: 

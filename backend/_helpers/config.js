@@ -1,60 +1,91 @@
+require('dotenv').config();
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
-
-console.log('Current directory:', __dirname);
-console.log('Looking for .env file at:', path.join(__dirname, '../.env'));
-
-const defaultConfig = require('../config.json');
-console.log('Loaded default config from:', path.resolve(__dirname, '../config.json'));
+const fs = require('fs');
+const rootPath = require('rootpath')();
 
 function getConfig() {
-    // Helper function to get environment variable or fallback
-    const getEnv = (key, fallback) => {
-        const value = process.env[key];
-        if (value === undefined) {
-            console.log(`Environment variable ${key} not found, using fallback:`, fallback);
+    try {
+        console.log('Current directory:', process.cwd());
+        
+        // Look for .env file first
+        const envPath = path.join(process.cwd(), '.env');
+        console.log('Looking for .env file at:', envPath);
+        if (fs.existsSync(envPath)) {
+            console.log('.env file found');
         } else {
-            console.log(`Found environment variable ${key}:`, key.includes('PASSWORD') ? '[HIDDEN]' : value);
+            console.log('.env file not found');
         }
-        return value || fallback;
-    };
-
-    // Override config with environment variables
-    const envConfig = {
-        database: {
-            host: getEnv('DB_HOST', defaultConfig.database.host),
-            port: parseInt(getEnv('DB_PORT', defaultConfig.database.port)),
-            user: getEnv('DB_USER', defaultConfig.database.user),
-            password: getEnv('DB_PASSWORD', defaultConfig.database.password),
-            database: getEnv('DB_NAME', defaultConfig.database.database)
-        },
-        secret: getEnv('JWT_SECRET', defaultConfig.secret),
-        emailFrom: getEnv('EMAIL_FROM', defaultConfig.emailFrom),
-        smtpOptions: {
-            host: getEnv('SMTP_HOST', defaultConfig.smtpOptions.host),
-            port: parseInt(getEnv('SMTP_PORT', defaultConfig.smtpOptions.port)),
-            auth: {
-                user: getEnv('SMTP_USER', defaultConfig.smtpOptions.auth.user),
-                pass: getEnv('SMTP_PASS', defaultConfig.smtpOptions.auth.pass)
-            }
-        },
-        frontendUrls: {
-            development: getEnv('FRONTEND_URL', defaultConfig.frontendUrls.development),
-            production: getEnv('PRODUCTION_FRONTEND_URL', defaultConfig.frontendUrls.production)
+        
+        // Load config from json file
+        const configPath = path.join(process.cwd(), 'config.json');
+        console.log('Loaded default config from:', configPath);
+        const config = require(configPath);
+        
+        // Override config settings with environment variables when available
+        config.database.host = process.env.DB_HOST || config.database.host;
+        console.log(`Environment variable DB_HOST ${process.env.DB_HOST ? 'found' : 'not found'}, using ${config.database.host}`);
+        
+        config.database.port = parseInt(process.env.DB_PORT || config.database.port);
+        console.log(`Environment variable DB_PORT ${process.env.DB_PORT ? 'found' : 'not found'}, using ${config.database.port}`);
+        
+        config.database.user = process.env.DB_USER || config.database.user;
+        console.log(`Environment variable DB_USER ${process.env.DB_USER ? 'found' : 'not found'}, using ${config.database.user}`);
+        
+        config.database.password = process.env.DB_PASSWORD || config.database.password;
+        console.log(`Environment variable DB_PASSWORD ${process.env.DB_PASSWORD ? 'found' : 'not found'}, using fallback`);
+        
+        config.database.database = process.env.DB_NAME || config.database.database;
+        console.log(`Environment variable DB_NAME ${process.env.DB_NAME ? 'found' : 'not found'}, using ${config.database.database}`);
+        
+        config.secret = process.env.JWT_SECRET || config.secret;
+        console.log(`Environment variable JWT_SECRET ${process.env.JWT_SECRET ? 'found' : 'not found'}, using fallback`);
+        
+        config.emailFrom = process.env.EMAIL_FROM || config.emailFrom;
+        console.log(`Environment variable EMAIL_FROM ${process.env.EMAIL_FROM ? 'found' : 'not found'}, using fallback`);
+        
+        if (process.env.SMTP_HOST) {
+            config.smtpOptions = {
+                host: process.env.SMTP_HOST,
+                port: parseInt(process.env.SMTP_PORT),
+                auth: {
+                    user: process.env.SMTP_USER,
+                    pass: process.env.SMTP_PASS
+                }
+            };
+        } else {
+            console.log(`Environment variable SMTP_HOST not found, using fallback`);
+            console.log(`Environment variable SMTP_PORT not found, using fallback`);
+            console.log(`Environment variable SMTP_USER not found, using fallback`);
+            console.log(`Environment variable SMTP_PASS not found, using fallback`);
         }
-    };
-
-    console.log('Final database config:', {
-        host: envConfig.database.host,
-        port: envConfig.database.port,
-        user: envConfig.database.user,
-        database: envConfig.database.database,
-        hasPassword: !!envConfig.database.password
-    });
-
-    return envConfig;
+        
+        if (process.env.FRONTEND_URL) {
+            config.frontendUrls.development = process.env.FRONTEND_URL;
+        } else {
+            console.log(`Environment variable FRONTEND_URL not found, using fallback: ${config.frontendUrls.development}`);
+        }
+        
+        if (process.env.PRODUCTION_FRONTEND_URL) {
+            config.frontendUrls.production = process.env.PRODUCTION_FRONTEND_URL;
+        } else {
+            console.log(`Environment variable PRODUCTION_FRONTEND_URL not found, using fallback`);
+        }
+        
+        console.log('Final database config:', {
+            host: config.database.host,
+            port: config.database.port,
+            user: config.database.user,
+            database: config.database.database,
+            hasPassword: !!config.database.password,
+        });
+        
+        console.log('Config loaded successfully');
+        
+        return config;
+    } catch (error) {
+        console.error('Error loading configuration:', error);
+        throw error;
+    }
 }
 
-const config = getConfig();
-console.log('Config loaded successfully');
-module.exports = config; 
+module.exports = getConfig(); 

@@ -1,10 +1,10 @@
 {
     "database": {
-      "host": "localhost",
+      "host": "153.92.15.31",
       "port": 3306,
-      "user": "root",
-      "password": "",
-      "database": "request_management_system"
+      "user": "u875409848_ito",
+      "password": "9T2Z5$3UKkgSYzE",
+      "database": "u875409848_ito"
     },
     "secret": "AXAXAXAXAXAXAXDXDXDXD",
     "emailFrom": "info@node-mysql-signup-verification-api.com",
