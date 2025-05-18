@@ -23,7 +23,7 @@ export class AuthGuard {
             '/account/forgot-password'
         ];
         
-        // Special handling for the root route - allow guest access
+        // Special handling for the root route - always allow guest access
         if (state.url === '/') {
             return true;
         }
