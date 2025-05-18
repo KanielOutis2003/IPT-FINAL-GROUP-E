@@ -1,0 +1,61 @@
+<div class="card">
+  <div class="card-header">Employees</div>
+  <div class="card-body">
+    <div class="alert alert-danger" *ngIf="errorMessage">{{errorMessage}}</div>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th style="width: 15%">Employee ID</th>
+            <th style="width: 20%">Name</th>
+            <th style="width: 15%">Position</th>
+            <th style="width: 15%">Department</th>
+            <th style="width: 15%">Status</th>
+            <th style="width: 20%">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let employee of employees">
+            <td>{{employee.employeeId}}</td>
+            <td>
+              <!-- Show name from user object if available, otherwise from direct properties -->
+              <span *ngIf="employee.user">{{employee.user.firstName}} {{employee.user.lastName}}</span>
+              <span *ngIf="!employee.user && (employee.firstName || employee.lastName)">
+                {{employee.firstName}} {{employee.lastName}}
+              </span>
+              <span *ngIf="!employee.user && !employee.firstName && !employee.lastName">
+                Unknown User
+              </span>
+            </td>
+            <td>{{employee.position}}</td>
+            <td>{{employee.department?.name || 'Unknown'}}</td>
+            <td>
+              <span *ngIf="employee.status === 'Active'" class="badge bg-success">Active</span>
+              <span *ngIf="employee.status !== 'Active'" class="badge bg-danger">{{employee.status}}</span>
+            </td>
+            <td style="white-space: nowrap">
+              <button class="btn btn-sm btn-info me-1" (click)="viewRequests(employee.id)">Requests</button>
+              <button class="btn btn-sm btn-info me-1" (click)="viewWorkflows(employee.id)">Workflows</button>
+              <button (click)="transfer(employee.id)" class="btn btn-sm btn-warning me-1">Transfer</button>
+              <a routerLink="edit/{{employee.id}}" class="btn btn-sm btn-primary me-1">Edit</a>
+            </td>
+          </tr>
+          <tr *ngIf="!employees?.length">
+            <td colspan="6" class="text-center">
+              <span *ngIf="loading" class="spinner-border spinner-border-lg align-center"></span>
+              <span *ngIf="!loading">No employees found</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <button class="btn btn-primary float-end" routerLink="add">Add Employee</button>
+  </div>
+</div>
+
+<!-- Transfer Employee Modal -->
+<app-employee-transfer 
+  *ngIf="showTransferModal" 
+  [employee]="employeeToTransfer" 
+  (closed)="onTransferClosed($event)">
+</app-employee-transfer> 
